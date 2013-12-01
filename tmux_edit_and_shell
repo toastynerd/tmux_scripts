@@ -1,0 +1,24 @@
+if [ $# -ne 2 ]
+then
+  echo "wrong number of arugments\n"
+  echo "correct usage: tmux_edit_and_sheel <session_name> <path_to_edit>"
+else
+  tmux has-session -t $1
+  if [ $? != 0 ]
+  then
+    #open up emacs to the given directory
+    tmux new-session -s $1 -n emacs -d
+    tmux send-keys -t $1 "cd $2" C-m
+    tmux send-keys -t $1 'emacs' C-m
+    
+    #open up a shell to given directory
+    tmux new-window -n console -t $1
+    tmux send-keys -t $1:1 "cd $2" C-m
+  else
+    echo "session $1 already exists"
+  fi
+    
+  #attach to current
+  tmux select-window -t $1:0
+  tmux attach -t $1
+fi
